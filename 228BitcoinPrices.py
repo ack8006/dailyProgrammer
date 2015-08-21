@@ -11,19 +11,22 @@
 
 #http://api.bitcoincharts.com/v1/trades.csv?symbol=bitfinexUSD
 
-import csv
-import urllib2
+import requests
 
 class BitcoinPricer(object):
 
-	def __init__(self, exchange, symbol, fileType = 'csv'):
-		self.bitcoinURL = "http://api.bitcoincharts.com/v1/trades.{}?symbol={}".format(fileType, exchange+symbol) 
-		print self.bitcoinURL
+	def getPrice(self, exchange, symbol):
+		bitcoinURL = "http://api.bitcoincharts.com/v1/trades.csv?"
+		response = requests.get(bitcoinURL, params={'symbol': exchange+symbol})
+		if response.ok:
+			page = response.text
+			self.printPrice(page)
+		else:
+			print "you done fucked up"
 
-	def getPrice(self):
-		response = urllib2.urlopen(self.bitcoinURL)
-		pageCSV = csv.reader(response)
-		print pageCSV.next()[1]
+	def printPrice(self, page):
+		lines = page.splitlines()
+		print lines[0].split(',')[1]
 
 def main():
 	exchange = raw_input('Please Select Exchange -> ')
@@ -31,8 +34,8 @@ def main():
 	#exchange = 'bitfinex'
 	#fx = 'USD'
 
-	bp = BitcoinPricer(exchange, fx)
-	price = bp.getPrice()
+	bp = BitcoinPricer()
+	price = bp.getPrice(exchange, fx)
 
 if __name__ == "__main__":
 	main()
